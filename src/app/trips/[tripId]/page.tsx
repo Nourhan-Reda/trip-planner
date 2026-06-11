@@ -1,3 +1,7 @@
+import { getBudgetStatsForTrip } from "@/features/budget/queries";
+import { formatCurrency } from "@/features/budget/utils";
+import { getPlaceStatsForTrip } from "@/features/place/queries";
+import { getTodoStatsForTrip } from "@/features/todo/queries";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { CheckSquare, MapPin, Wallet, ArrowRight } from "lucide-react";
@@ -12,32 +16,28 @@ export default async function TripOverviewPage({
 }) {
   const { tripId } = await params;
 
-  const trip = await prisma.trip.findUnique({
-    where: { id: tripId },
-    include: {
-      todos: true,
-      places: true,
-      expenses: true,
-    },
-  });
+  const [trip, todoStats, budgetStats, placeStats] = await Promise.all([
+    prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { id: true },
+    }),
+    getTodoStatsForTrip(tripId),
+    getBudgetStatsForTrip(tripId),
+    getPlaceStatsForTrip(tripId),
+  ]);
 
-  if (!trip) {
+  if (!trip || !budgetStats) {
     notFound();
   }
 
-  // Todos stats
-  const totalTodos = trip.todos.length;
-  const completedTodos = trip.todos.filter((t) => t.completed).length;
+  const { total: totalTodos, completed: completedTodos } = todoStats;
   const todoPercentage = totalTodos > 0 ? Math.round((completedTodos / totalTodos) * 100) : 0;
 
-  // Places stats
-  const totalPlaces = trip.places.length;
-  const visitedPlaces = trip.places.filter((p) => p.visited).length;
+  const { total: totalPlaces, visited: visitedPlaces } = placeStats;
   const placePercentage = totalPlaces > 0 ? Math.round((visitedPlaces / totalPlaces) * 100) : 0;
 
-  // Budget stats
-  const totalSpent = trip.expenses.reduce((sum, e) => sum + e.amount, 0);
-  const budgetPercentage = Math.min(Math.round((totalSpent / trip.budget) * 100), 100);
+  const { totalSpent, budgetPercentage } = budgetStats;
+  const tripBudget = budgetStats.budget;
 
   const cards = [
     {
@@ -51,24 +51,24 @@ export default async function TripOverviewPage({
       linkText: "Manage checklist",
     },
     {
-      title: "Places to Visit",
+      title: "Place tracking",
       desc: "Map out the sights, food joints, and events you want to hit.",
       stats: `${visitedPlaces} of ${totalPlaces} places visited`,
       percentage: placePercentage,
       color: "#3B82F6", // Blue
       icon: MapPin,
       link: `/trips/${tripId}/places`,
-      linkText: "Explore places",
+      linkText: "Manage places",
     },
     {
-      title: "Budget & Expenses",
+      title: "Budget management",
       desc: "Log your spends and stay within your planned trip allowance.",
-      stats: `$${totalSpent.toLocaleString()} of $${trip.budget.toLocaleString()} spent`,
+      stats: `${formatCurrency(totalSpent)} of ${formatCurrency(tripBudget)} spent`,
       percentage: budgetPercentage,
       color: "#F59E0B", // Amber
       icon: Wallet,
       link: `/trips/${tripId}/budget`,
-      linkText: "Track budget",
+      linkText: "Manage budget",
     },
   ];
 
@@ -83,9 +83,10 @@ export default async function TripOverviewPage({
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <div
+            <Link
               key={card.title}
-              className="rounded-3xl p-6 flex flex-col justify-between gap-6"
+              href={card.link}
+              className="group rounded-3xl p-6 flex flex-col justify-between gap-6 transition-all duration-300 hover:scale-[1.02] hover:bg-white/[0.04]"
               style={{
                 background: "rgba(255,255,255,0.03)",
                 border: "1px solid rgba(255,255,255,0.05)",
@@ -98,7 +99,9 @@ export default async function TripOverviewPage({
                 >
                   <Icon size={18} style={{ color: card.color }} />
                 </div>
-                <h3 className="text-lg font-bold text-slate-200">{card.title}</h3>
+                <h3 className="text-lg font-bold text-slate-200 group-hover:text-white transition-colors">
+                  {card.title}
+                </h3>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{card.desc}</p>
               </div>
 
@@ -117,16 +120,15 @@ export default async function TripOverviewPage({
                   />
                 </div>
 
-                <Link
-                  href={card.link}
-                  className="flex items-center gap-1.5 text-xs font-bold transition hover:opacity-80"
+                <span
+                  className="flex items-center gap-1.5 text-xs font-bold transition group-hover:gap-2"
                   style={{ color: card.color }}
                 >
                   {card.linkText}
                   <ArrowRight size={12} />
-                </Link>
+                </span>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
