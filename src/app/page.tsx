@@ -520,7 +520,7 @@ const STEPS = [
   },
   {
     icon: Users,
-    accent: "#8B5CF6",
+    accent: "#885DEC",
     title: "Return & remember",
     desc: "All visited places, completed tasks, and total spend. Your trip, fully documented.",
   },
