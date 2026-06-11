@@ -60,7 +60,19 @@ async function getHomeData() {
     .sort((a, b) => b.tripCount - a.tripCount)
     .slice(0, 6);
 
-  return { totalTrips, totalPlaces, totalExpenses, totalTodos, popularDestinations };
+  const featuredTrip = await prisma.trip.findFirst({
+    select: { id: true },
+    orderBy: { startDate: "desc" },
+  });
+
+  return {
+    totalTrips,
+    totalPlaces,
+    totalExpenses,
+    totalTodos,
+    popularDestinations,
+    featuredTripId: featuredTrip?.id ?? null,
+  };
 }
 
 // ─── Unsplash image map ─────────────────────────────────────────────────────
@@ -99,7 +111,7 @@ function getDestinationImage(destination: string): string {
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const { totalTrips, totalPlaces, totalExpenses, totalTodos, popularDestinations } =
+  const { totalTrips, totalPlaces, totalExpenses, totalTodos, popularDestinations, featuredTripId } =
     await getHomeData();
 
   return (
@@ -107,7 +119,7 @@ export default async function HomePage() {
       <NavBar />
       <HeroSection totalTrips={totalTrips} totalPlaces={totalPlaces} />
       <DestinationsSection destinations={popularDestinations} />
-      <FeaturesSection />
+      <FeaturesSection featuredTripId={featuredTripId} />
       <HowItWorksSection />
       <CtaSection />
       <FooterSection totalExpenses={totalExpenses} totalTodos={totalTodos} />
@@ -150,15 +162,15 @@ function NavBar() {
 
       <div className="flex items-center gap-3">
         <Link
-          href="/sign-in"
-          className="text-sm"
+          href="/trips"
+          className="text-sm hover:text-white transition-colors"
           style={{ color: "rgba(248,246,241,0.6)" }}
         >
-          Sign in
+          Dashboard
         </Link>
         <Link
-          href="/sign-up"
-          className="rounded-lg px-4 py-2 text-sm font-semibold transition"
+          href="/trips/create"
+          className="rounded-lg px-4 py-2 text-sm font-semibold transition hover:opacity-90"
           style={{ background: "#F59E0B", color: "#0A0F1E" }}
         >
           Get started
@@ -245,7 +257,7 @@ function HeroSection({ totalTrips, totalPlaces }: { totalTrips: number; totalPla
 
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/sign-up"
+            href="/trips/create"
             className="flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold transition hover:opacity-90"
             style={{ background: "#F59E0B", color: "#0A0F1E" }}
           >
@@ -336,8 +348,8 @@ function DestinationsSection({ destinations }: { destinations: Destination[] }) 
               Be the first to plan a trip!
             </p>
             <Link
-              href="/sign-up"
-              className="mt-5 rounded-xl px-5 py-2.5 text-sm font-semibold"
+              href="/trips/create"
+              className="mt-5 rounded-xl px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition"
               style={{ background: "#F59E0B", color: "#0A0F1E" }}
             >
               Plan your first trip
@@ -413,38 +425,62 @@ function DestinationCard({ dest, index }: { dest: Destination; index: number }) 
 
 // ─── Features ─────────────────────────────────────────────────────────────────
 
-const FEATURES = [
-  {
-    icon: MapPin,
-    accent: "#3B82F6",
-    bg: "rgba(59,130,246,0.1)",
-    title: "Place tracking",
-    desc: "Pin every spot — restaurants, landmarks, hidden gems — with address and visited status.",
-  },
-  {
-    icon: Wallet,
-    accent: "#F59E0B",
-    bg: "rgba(245,158,11,0.1)",
-    title: "Budget management",
-    desc: "Log expenses by category on the go. See real-time spend vs your trip budget.",
-  },
-  {
-    icon: CheckSquare,
-    accent: "#10B981",
-    bg: "rgba(16,185,129,0.1)",
-    title: "Smart todos",
-    desc: "From visa applications to packing lists — a per-trip checklist that keeps you on track.",
-  },
-  {
-    icon: LayoutDashboard,
-    accent: "#8B5CF6",
-    bg: "rgba(139,92,246,0.1)",
-    title: "Multi-trip workspace",
-    desc: "All your trips in one dashboard. Past, present, and future adventures, organized.",
-  },
-];
+function getFeatureHrefs(featuredTripId: string | null) {
+  if (!featuredTripId) {
+    return {
+      places: "/trips/create",
+      budget: "/trips/create",
+      todos: "/trips/create",
+      trips: "/trips",
+    };
+  }
 
-function FeaturesSection() {
+  const tripBase = `/trips/${featuredTripId}`;
+  return {
+    places: `${tripBase}/places`,
+    budget: `${tripBase}/budget`,
+    todos: `${tripBase}/todos`,
+    trips: "/trips",
+  };
+}
+
+function FeaturesSection({ featuredTripId }: { featuredTripId: string | null }) {
+  const hrefs = getFeatureHrefs(featuredTripId);
+
+  const FEATURES = [
+    {
+      icon: MapPin,
+      accent: "#3B82F6",
+      bg: "rgba(59,130,246,0.1)",
+      title: "Place tracking",
+      desc: "Pin every spot — restaurants, landmarks, hidden gems — with address and visited status.",
+      href: hrefs.places,
+    },
+    {
+      icon: Wallet,
+      accent: "#F59E0B",
+      bg: "rgba(245,158,11,0.1)",
+      title: "Budget management",
+      desc: "Log expenses by category on the go. See real-time spend vs your trip budget.",
+      href: hrefs.budget,
+    },
+    {
+      icon: CheckSquare,
+      accent: "#10B981",
+      bg: "rgba(16,185,129,0.1)",
+      title: "Smart todos",
+      desc: "From visa applications to packing lists — a per-trip checklist that keeps you on track.",
+      href: hrefs.todos,
+    },
+    {
+      icon: LayoutDashboard,
+      accent: "#8B5CF6",
+      bg: "rgba(139,92,246,0.1)",
+      title: "Multi-trip workspace",
+      desc: "All your trips in one dashboard. Past, present, and future adventures, organized.",
+      href: hrefs.trips,
+    },
+  ];
   return (
     <section
       id="features"
@@ -471,26 +507,35 @@ function FeaturesSection() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="group rounded-3xl p-6 transition duration-300 hover:scale-[1.02]"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <div
-                className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl"
-                style={{ background: f.bg }}
+          {FEATURES.map((f) => {
+            const Icon = f.icon;
+            return (
+              <Link
+                key={f.title}
+                href={f.href}
+                className="group block rounded-3xl p-6 transition-all duration-300 hover:scale-[1.02] hover:bg-white/[0.06]"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
               >
-                <f.icon size={20} style={{ color: f.accent }} />
-              </div>
-              <h3 className="mb-2 font-bold" style={{ color: "#F8F6F1" }}>
-                {f.title}
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(248,246,241,0.45)" }}>
-                {f.desc}
-              </p>
-            </div>
-          ))}
+                <div
+                  className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl"
+                  style={{ background: f.bg }}
+                >
+                  <Icon size={20} style={{ color: f.accent }} />
+                </div>
+                <h3 className="mb-2 font-bold flex items-center justify-between" style={{ color: "#F8F6F1" }}>
+                  {f.title}
+                  <ArrowRight
+                    size={14}
+                    className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                    style={{ color: "#F59E0B" }}
+                  />
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(248,246,241,0.45)" }}>
+                  {f.desc}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -646,7 +691,7 @@ function CtaSection() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/sign-up"
+              href="/trips/create"
               className="flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold transition hover:opacity-90"
               style={{ background: "#F59E0B", color: "#0A0F1E" }}
             >

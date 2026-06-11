@@ -65,6 +65,9 @@ model Todo {
   id        String   @id @default(cuid())
   title     String
   completed Boolean @default(false)
+  dueAt     DateTime?   @db.Timestamp(6)   // optional due date
+  priority  Int?        // 1 (low) – 3 (high)
+  tags      String[]    @default([]) // array of tag strings
 
   tripId    String
   trip      Trip @relation(fields: [tripId], references: [id])
