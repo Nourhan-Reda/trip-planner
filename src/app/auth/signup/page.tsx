@@ -51,7 +51,7 @@ export default function SignupPage() {
     );
 
     setTimeout(() => {
-      router.push("/login");
+      router.push("/");
     }, 1000);
   };
 
