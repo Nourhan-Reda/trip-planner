@@ -35,7 +35,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("auth/login");
+    router.refresh();
+    router.push("/auth/login");
   };
 
   return (
@@ -92,14 +93,14 @@ export default function Navbar() {
         ) : (
           <>
             <Link
-              href="auth/login"
+              href="/auth/login"
               className="rounded-lg border border-white/20 px-4 py-2 text-sm text-white transition hover:bg-white/10"
             >
               Login
             </Link>
 
             <Link
-              href="auth/signup"
+              href="/auth/signup"
               className="rounded-lg border border-amber-500 px-4 py-2 text-sm font-semibold transition hover:opacity-90"
               style={{
                 color: "#F59E0B",

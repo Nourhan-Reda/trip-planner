@@ -1,22 +1,10 @@
-import { prisma } from "@/lib/prisma";
 import { TripCreateForm } from "./form";
 import { Plane, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-export const revalidate = 0; // Dynamic to fetch latest users
+export const revalidate = 0;
 
 export default async function CreateTripPage() {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#0A0F1E", fontFamily: "'Inter', sans-serif" }}>
       {/* Navigation */}
@@ -72,7 +60,7 @@ export default async function CreateTripPage() {
             </p>
           </div>
 
-          <TripCreateForm users={users} />
+          <TripCreateForm />
         </div>
       </main>
     </div>

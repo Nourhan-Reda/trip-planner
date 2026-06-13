@@ -2,16 +2,10 @@
 
 import { useActionState } from "react";
 import { createTripAction, CreateTripState } from "@/features/trip/actions";
-import { Plane, Calendar, MapPin, Wallet, ArrowRight, User } from "lucide-react";
+import { Plane, Calendar, MapPin, Wallet, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-type UserOption = {
-  id: string;
-  name: string;
-  email: string;
-};
-
-export function TripCreateForm({ users }: { users: UserOption[] }) {
+export function TripCreateForm() {
   const [state, formAction, isPending] = useActionState(createTripAction, null);
 
   return (
@@ -129,68 +123,32 @@ export function TripCreateForm({ users }: { users: UserOption[] }) {
         </div>
       </div>
 
-      {/* Budget & User Grid */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="block text-sm font-semibold mb-2" style={{ color: "rgba(248,246,241,0.8)" }}>
-            Budget (USD)
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500">
-              <Wallet size={18} />
-            </div>
-            <input
-              type="number"
-              name="budget"
-              min="0"
-              placeholder="e.g. 1500"
-              className="w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-              style={{
-                background: "rgba(255,255,255,0.02)",
-                borderColor: "rgba(255,255,255,0.08)",
-                color: "#F8F6F1",
-              }}
-              required
-            />
+      {/* Budget */}
+      <div>
+        <label className="block text-sm font-semibold mb-2" style={{ color: "rgba(248,246,241,0.8)" }}>
+          Budget (USD)
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500">
+            <Wallet size={18} />
           </div>
-          {state?.errors?.budget && (
-            <p className="mt-1 text-xs text-red-400">{state.errors.budget[0]}</p>
-          )}
+          <input
+            type="number"
+            name="budget"
+            min="0"
+            placeholder="e.g. 1500"
+            className="w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              borderColor: "rgba(255,255,255,0.08)",
+              color: "#F8F6F1",
+            }}
+            required
+          />
         </div>
-
-        <div>
-          <label className="block text-sm font-semibold mb-2" style={{ color: "rgba(248,246,241,0.8)" }}>
-            Select User (Simulated Auth)
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500">
-              <User size={18} />
-            </div>
-            <select
-              name="userId"
-              className="w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-              style={{
-                background: "#0A0F1E",
-                borderColor: "rgba(255,255,255,0.08)",
-                color: "#F8F6F1",
-              }}
-              required
-              defaultValue=""
-            >
-              <option value="" disabled style={{ background: "#0A0F1E" }}>
-                Choose a planner...
-              </option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id} style={{ background: "#0A0F1E" }}>
-                  {user.name} ({user.email})
-                </option>
-              ))}
-            </select>
-          </div>
-          {state?.errors?.userId && (
-            <p className="mt-1 text-xs text-red-400">{state.errors.userId[0]}</p>
-          )}
-        </div>
+        {state?.errors?.budget && (
+          <p className="mt-1 text-xs text-red-400">{state.errors.budget[0]}</p>
+        )}
       </div>
 
       {/* Buttons */}

@@ -1,3 +1,4 @@
+import { requireCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Plane, Calendar, MapPin, Wallet, CheckSquare, Plus, ArrowRight, User as UserIcon } from "lucide-react";
 import Link from "next/link";
@@ -44,7 +45,12 @@ function formatDate(date: Date) {
 }
 
 export default async function TripsPage() {
+  const user = await requireCurrentUser();
+
   const trips = await prisma.trip.findMany({
+    where: {
+      userId: user.id,
+    },
     include: {
       _count: {
         select: {

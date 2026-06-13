@@ -8,11 +8,12 @@ datasource db {
   directUrl= env("DIRECT_URL")
 }
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
+  id         String   @id @default(cuid())
+  supabaseId String?  @unique
+  name       String
+  email      String   @unique
 
-  trips     Trip[]
+  trips      Trip[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

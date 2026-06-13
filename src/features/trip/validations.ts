@@ -6,5 +6,4 @@ export const createTripSchema = z.object({
   startDate: z.string().min(1, "Start date is required").transform((val) => new Date(val)),
   endDate: z.string().min(1, "End date is required").transform((val) => new Date(val)),
   budget: z.coerce.number().min(0, "Budget must be a positive number"),
-  userId: z.string().min(1, "Please select a user"),
 });

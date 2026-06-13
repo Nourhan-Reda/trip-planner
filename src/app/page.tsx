@@ -1,5 +1,6 @@
 export const revalidate = 3600;
 
+import { getCurrentPrismaUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import type { Destination } from "@/types/Destination ";
 
@@ -21,13 +22,24 @@ async function getHomeData(): Promise<{
   popularDestinations: Destination[];
   featuredTripId: string | null;
 }> {
+  const currentUser = await getCurrentPrismaUser();
+
   const [totalTrips, totalPlaces, totalExpenses, totalTodos, tripsWithPlaces, featuredTrip] =
     await Promise.all([
-      prisma.trip.count(),
-      prisma.place.count(),
-      prisma.expense.count(),
-      prisma.todo.count(),
+      currentUser
+        ? prisma.trip.count({ where: { userId: currentUser.id } })
+        : prisma.trip.count(),
+      currentUser
+        ? prisma.place.count({ where: { trip: { userId: currentUser.id } } })
+        : prisma.place.count(),
+      currentUser
+        ? prisma.expense.count({ where: { trip: { userId: currentUser.id } } })
+        : prisma.expense.count(),
+      currentUser
+        ? prisma.todo.count({ where: { trip: { userId: currentUser.id } } })
+        : prisma.todo.count(),
       prisma.trip.findMany({
+        where: currentUser ? { userId: currentUser.id } : undefined,
         select: {
           id: true,
           destination: true,
@@ -35,6 +47,7 @@ async function getHomeData(): Promise<{
         },
       }),
       prisma.trip.findFirst({
+        where: currentUser ? { userId: currentUser.id } : undefined,
         select: { id: true },
         orderBy: { startDate: "desc" },
       }),

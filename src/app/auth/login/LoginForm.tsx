@@ -1,32 +1,29 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function SignupPage() {
+export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/trips";
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        data: {
-          name,
-        },
-      },
     });
 
     setLoading(false);
@@ -36,9 +33,9 @@ export default function SignupPage() {
       return;
     }
 
-    toast.success("Account created successfully");
+    toast.success("Welcome back ✈️");
     router.refresh();
-    router.push("/trips");
+    router.push(redirectTo);
   };
 
   return (
@@ -53,22 +50,14 @@ export default function SignupPage() {
           }}
         >
           <h1 className="mb-2 text-center text-4xl font-bold text-white">
-            Create Account
+            Welcome Back
           </h1>
 
           <p className="mb-8 text-center text-gray-400">
-            Start planning smarter trips.
+            Continue planning your next adventure.
           </p>
 
-          <form onSubmit={handleSignup} className="space-y-5">
-            <input
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-amber-500"
-              required
-            />
-
+          <form onSubmit={handleLogin} className="space-y-5">
             <input
               type="email"
               placeholder="Email"
@@ -91,14 +80,14 @@ export default function SignupPage() {
               disabled={loading}
               className="w-full rounded-xl bg-amber-500 py-3 font-semibold text-black transition hover:bg-amber-400 disabled:opacity-50"
             >
-              {loading ? "Creating..." : "Create Account"}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-400">
-            Already have an account?{" "}
-            <Link href="/auth/login" className="font-semibold text-amber-500">
-              Login
+            donot have an account?{" "}
+            <Link href="/auth/signup" className="font-semibold text-amber-500">
+              Sign Up
             </Link>
           </p>
         </div>

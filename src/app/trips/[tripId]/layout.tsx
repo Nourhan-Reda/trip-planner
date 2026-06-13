@@ -1,3 +1,4 @@
+import { requireCurrentUser, requireOwnedTrip } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Plane, ChevronLeft, MapPin, Calendar, Wallet } from "lucide-react";
@@ -51,9 +52,11 @@ export default async function TripLayout({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
+  const user = await requireCurrentUser();
+  const ownedTrip = await requireOwnedTrip(tripId, user.id);
 
   const trip = await prisma.trip.findUnique({
-    where: { id: tripId },
+    where: { id: ownedTrip.id },
     include: {
       user: true,
     },
