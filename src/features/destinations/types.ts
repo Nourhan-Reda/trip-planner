@@ -18,6 +18,15 @@ export type DestinationCatalogEntry = {
   places: RecommendedPlace[];
 };
 
+export type DiscoveryDestination = {
+  key: string;
+  displayName: string;
+  image: string;
+  tagline: string;
+  highlight: string;
+  planDestination: string;
+};
+
 export type TripRecommendationGroup = {
   tripId: string;
   tripTitle: string;

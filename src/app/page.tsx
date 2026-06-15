@@ -6,11 +6,13 @@ import { fetchTripsForDestinationSection } from "@/features/destinations/queries
 
 import Navbar from "@/components/ui/Navbar";
 import Hero from "@/components/ui/Hero";
+import DiscoverDestinations from "@/components/ui/DiscoverDestinations";
 import Destinations from "@/components/ui/Destination";
 import Features from "@/components/ui/Features ";
 import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
 import Cta from "@/components/ui/cta";
 import Footer from "@/components/ui/footer";
+import { DiscoverHashScroll } from "@/components/ui/ScrollLink";
 
 // ─── Data fetching ──────────────────────────────────────────────────────────
 
@@ -22,6 +24,10 @@ async function getHomeData(): Promise<{
   destinationSection: Awaited<
     ReturnType<typeof fetchTripsForDestinationSection>
   >["sectionData"];
+  discoveryDestinations: Awaited<
+    ReturnType<typeof fetchTripsForDestinationSection>
+  >["discoveryDestinations"];
+  hasExistingTrips: boolean;
   featuredTripId: string | null;
 }> {
   const currentUser = await getCurrentPrismaUser();
@@ -60,6 +66,8 @@ async function getHomeData(): Promise<{
     totalExpenses,
     totalTodos,
     destinationSection: destinationData.sectionData,
+    discoveryDestinations: destinationData.discoveryDestinations,
+    hasExistingTrips: destinationData.userTrips.length > 0,
     featuredTripId: featuredTrip?.id ?? null,
   };
 }
@@ -73,6 +81,8 @@ export default async function HomePage() {
     totalExpenses,
     totalTodos,
     destinationSection,
+    discoveryDestinations,
+    hasExistingTrips,
     featuredTripId,
   } = await getHomeData();
 
@@ -81,9 +91,14 @@ export default async function HomePage() {
       className="min-h-screen"
       style={{ background: "#0A0F1E", fontFamily: "'Inter', sans-serif" }}
     >
+      <DiscoverHashScroll />
       <Navbar />
       <Hero totalTrips={totalTrips} totalPlaces={totalPlaces} />
       <Destinations sectionData={destinationSection} />
+      <DiscoverDestinations
+        destinations={discoveryDestinations}
+        hasExistingTrips={hasExistingTrips}
+      />
       <Features featuredTripId={featuredTripId} />
       <ShowcaseCarousel />
       <Cta />

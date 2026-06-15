@@ -1,5 +1,7 @@
 import { Plane, MapPin, Star, ArrowRight, Globe, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import ScrollLink, { DiscoverHashScroll } from "@/components/ui/ScrollLink";
+import { DISCOVER_DESTINATIONS_HASH } from "@/features/destinations/constants";
 
 const FLOATING_PHOTOS = [
   {
@@ -102,14 +104,14 @@ export default function Hero({ totalTrips, totalPlaces }: HeroProps) {
             Start planning free
             <ArrowRight size={16} />
           </Link>
-          <Link
-            href="#destinations"
+          <ScrollLink
+            href={DISCOVER_DESTINATIONS_HASH}
             className="flex items-center gap-2 rounded-xl border px-7 py-3.5 text-sm font-medium transition hover:bg-white/5"
             style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(248,246,241,0.7)" }}
           >
             <Globe size={16} />
             Explore destinations
-          </Link>
+          </ScrollLink>
         </div>
 
         {/* Stats */}

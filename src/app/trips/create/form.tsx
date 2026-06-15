@@ -5,7 +5,11 @@ import { createTripAction, CreateTripState } from "@/features/trip/actions";
 import { Plane, Calendar, MapPin, Wallet, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export function TripCreateForm() {
+export function TripCreateForm({
+  defaultDestination = "",
+}: {
+  defaultDestination?: string;
+}) {
   const [state, formAction, isPending] = useActionState(createTripAction, null);
 
   return (
@@ -56,6 +60,7 @@ export function TripCreateForm() {
             type="text"
             name="destination"
             placeholder="e.g. Paris, France"
+            defaultValue={defaultDestination}
             className="w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
             style={{
               background: "rgba(255,255,255,0.02)",

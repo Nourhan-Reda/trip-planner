@@ -4,7 +4,14 @@ import Link from "next/link";
 
 export const revalidate = 0;
 
-export default async function CreateTripPage() {
+export default async function CreateTripPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ destination?: string }>;
+}) {
+  const { destination } = await searchParams;
+  const defaultDestination = destination?.trim() ?? "";
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#0A0F1E", fontFamily: "'Inter', sans-serif" }}>
       {/* Navigation */}
@@ -60,7 +67,7 @@ export default async function CreateTripPage() {
             </p>
           </div>
 
-          <TripCreateForm />
+          <TripCreateForm defaultDestination={defaultDestination} />
         </div>
       </main>
     </div>

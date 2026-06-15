@@ -1,5 +1,7 @@
 import { Plane, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import ScrollLink from "@/components/ui/ScrollLink";
+import { DISCOVER_DESTINATIONS_HASH } from "@/features/destinations/constants";
 
 const PHOTOS = [
   "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=300&q=60",
@@ -66,13 +68,13 @@ export default function Cta() {
               Start planning free
               <ArrowRight size={16} />
             </Link>
-            <Link
-              href="#destinations"
+            <ScrollLink
+              href={DISCOVER_DESTINATIONS_HASH}
               className="flex items-center gap-2 rounded-xl border px-7 py-3.5 text-sm font-medium transition hover:bg-white/5"
               style={{ borderColor: "rgba(245,158,11,0.25)", color: "rgba(248,246,241,0.6)" }}
             >
               Browse destinations
-            </Link>
+            </ScrollLink>
           </div>
         </div>
       </div>

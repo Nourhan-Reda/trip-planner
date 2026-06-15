@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import type { CommunityDestination, DestinationSectionData } from "./types";
+import { buildDiscoveryDestinations } from "./discovery";
+import type {
+  CommunityDestination,
+  DestinationSectionData,
+  DiscoveryDestination,
+} from "./types";
 import { buildTripRecommendationGroups } from "./utils";
 
 function buildCommunityDestinations(
@@ -69,9 +74,19 @@ export async function fetchTripsForDestinationSection(userId: string | null) {
       : Promise.resolve([]),
   ]);
 
+  const discoveryDestinations = buildDiscoveryDestinations(
+    userTrips.map((trip) => trip.destination)
+  );
+
   return {
     tripsWithPlaces,
     userTrips,
     sectionData: buildDestinationSectionData(userTrips, tripsWithPlaces),
+    discoveryDestinations,
   };
 }
+
+export type DestinationPageData = {
+  sectionData: DestinationSectionData;
+  discoveryDestinations: DiscoveryDestination[];
+};
