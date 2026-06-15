@@ -19,7 +19,7 @@ const FOOTER_NAV = [
     links: [
       { label: "Destinations", href: "#destinations" },
       { label: "Features", href: "#features" },
-      { label: "How it works", href: "#how-it-works" },
+      { label: "Showcase", href: "#showcase" },
       { label: "Dashboard", href: "/trips" },
     ],
   },

@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 const NAV_LINKS = [
   { label: "Destinations", href: "#destinations" },
   { label: "Features", href: "#features" },
-  { label: "How it works", href: "#how-it-works" },
+  { label: "Showcase", href: "#showcase" },
 ];
 
 export default function Navbar() {

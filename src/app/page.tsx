@@ -8,7 +8,7 @@ import Navbar from "@/components/ui/Navbar";
 import Hero from "@/components/ui/Hero";
 import Destinations from "@/components/ui/Destination";
 import Features from "@/components/ui/Features ";
-import HowItWorks from "@/components/ui/Howitworks";
+import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
 import Cta from "@/components/ui/cta";
 import Footer from "@/components/ui/footer";
 
@@ -104,7 +104,7 @@ export default async function HomePage() {
       <Hero totalTrips={totalTrips} totalPlaces={totalPlaces} />
       <Destinations destinations={popularDestinations} />
       <Features featuredTripId={featuredTripId} />
-      <HowItWorks />
+      <ShowcaseCarousel />
       <Cta />
       <Footer totalExpenses={totalExpenses} totalTodos={totalTodos} />
     </div>
