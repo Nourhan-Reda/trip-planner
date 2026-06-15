@@ -65,14 +65,6 @@ export default function Navbar() {
 
       <div className="flex items-center gap-3">
         <Link
-          href="/trips"
-          className="text-sm transition-colors hover:opacity-80"
-          style={{ color: "rgba(248,246,241,0.6)" }}
-        >
-          Dashboard
-        </Link>
-
-        <Link
           href="/trips/create"
           className="rounded-lg px-4 py-2 text-sm font-semibold transition hover:opacity-90"
           style={{
