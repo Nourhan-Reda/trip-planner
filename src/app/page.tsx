@@ -1,8 +1,8 @@
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 import { getCurrentPrismaUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type { Destination } from "@/types/Destination ";
+import { fetchTripsForDestinationSection } from "@/features/destinations/queries";
 
 import Navbar from "@/components/ui/Navbar";
 import Hero from "@/components/ui/Hero";
@@ -19,66 +19,47 @@ async function getHomeData(): Promise<{
   totalPlaces: number;
   totalExpenses: number;
   totalTodos: number;
-  popularDestinations: Destination[];
+  destinationSection: Awaited<
+    ReturnType<typeof fetchTripsForDestinationSection>
+  >["sectionData"];
   featuredTripId: string | null;
 }> {
   const currentUser = await getCurrentPrismaUser();
 
-  const [totalTrips, totalPlaces, totalExpenses, totalTodos, tripsWithPlaces, featuredTrip] =
-    await Promise.all([
-      currentUser
-        ? prisma.trip.count({ where: { userId: currentUser.id } })
-        : prisma.trip.count(),
-      currentUser
-        ? prisma.place.count({ where: { trip: { userId: currentUser.id } } })
-        : prisma.place.count(),
-      currentUser
-        ? prisma.expense.count({ where: { trip: { userId: currentUser.id } } })
-        : prisma.expense.count(),
-      currentUser
-        ? prisma.todo.count({ where: { trip: { userId: currentUser.id } } })
-        : prisma.todo.count(),
-      prisma.trip.findMany({
-        where: currentUser ? { userId: currentUser.id } : undefined,
-        select: {
-          id: true,
-          destination: true,
-          _count: { select: { places: true, expenses: true, todos: true } },
-        },
-      }),
-      prisma.trip.findFirst({
-        where: currentUser ? { userId: currentUser.id } : undefined,
-        select: { id: true },
-        orderBy: { startDate: "desc" },
-      }),
-    ]);
-
-  const destinationMap = new Map<string, Destination>();
-  for (const trip of tripsWithPlaces) {
-    const key = trip.destination.trim().toLowerCase();
-    if (destinationMap.has(key)) {
-      const existing = destinationMap.get(key)!;
-      existing.tripCount += 1;
-      existing.placesCount += trip._count.places;
-    } else {
-      destinationMap.set(key, {
-        destination: trip.destination,
-        tripCount: 1,
-        placesCount: trip._count.places,
-      });
-    }
-  }
-
-  const popularDestinations = Array.from(destinationMap.values())
-    .sort((a, b) => b.tripCount - a.tripCount)
-    .slice(0, 6);
+  const [
+    totalTrips,
+    totalPlaces,
+    totalExpenses,
+    totalTodos,
+    destinationData,
+    featuredTrip,
+  ] = await Promise.all([
+    currentUser
+      ? prisma.trip.count({ where: { userId: currentUser.id } })
+      : prisma.trip.count(),
+    currentUser
+      ? prisma.place.count({ where: { trip: { userId: currentUser.id } } })
+      : prisma.place.count(),
+    currentUser
+      ? prisma.expense.count({ where: { trip: { userId: currentUser.id } } })
+      : prisma.expense.count(),
+    currentUser
+      ? prisma.todo.count({ where: { trip: { userId: currentUser.id } } })
+      : prisma.todo.count(),
+    fetchTripsForDestinationSection(currentUser?.id ?? null),
+    prisma.trip.findFirst({
+      where: currentUser ? { userId: currentUser.id } : undefined,
+      select: { id: true },
+      orderBy: { startDate: "desc" },
+    }),
+  ]);
 
   return {
     totalTrips,
     totalPlaces,
     totalExpenses,
     totalTodos,
-    popularDestinations,
+    destinationSection: destinationData.sectionData,
     featuredTripId: featuredTrip?.id ?? null,
   };
 }
@@ -91,7 +72,7 @@ export default async function HomePage() {
     totalPlaces,
     totalExpenses,
     totalTodos,
-    popularDestinations,
+    destinationSection,
     featuredTripId,
   } = await getHomeData();
 
@@ -102,7 +83,7 @@ export default async function HomePage() {
     >
       <Navbar />
       <Hero totalTrips={totalTrips} totalPlaces={totalPlaces} />
-      <Destinations destinations={popularDestinations} />
+      <Destinations sectionData={destinationSection} />
       <Features featuredTripId={featuredTripId} />
       <ShowcaseCarousel />
       <Cta />
