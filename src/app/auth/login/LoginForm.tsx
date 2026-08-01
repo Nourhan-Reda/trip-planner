@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
@@ -21,6 +21,7 @@ export default function LoginForm() {
 
     setLoading(true);
 
+    const supabase = getSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,

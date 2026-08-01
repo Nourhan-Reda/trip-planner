@@ -4,7 +4,7 @@ import Link from "next/link";
 import Logo from "./Logo";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 const NAV_LINKS = [
   { label: "Destinations", href: "#destinations" },
@@ -18,6 +18,8 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+
     supabase.auth.getSession().then(({ data }) => {
       setIsLoggedIn(!!data.session);
     });
@@ -34,6 +36,8 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
+    const supabase = getSupabaseBrowserClient();
+
     await supabase.auth.signOut();
     router.refresh();
     router.push("/auth/login");
